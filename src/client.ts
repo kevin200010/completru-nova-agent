@@ -4,6 +4,8 @@ import {
   InvokeModelWithBidirectionalStreamCommand,
   InvokeModelWithBidirectionalStreamInput,
 } from "@aws-sdk/client-bedrock-runtime";
+import { BedrockKnowledgeBaseClient } from "./bedrock-kb-client";
+
 import axios from 'axios';
 import https from 'https';
 import {
@@ -23,7 +25,8 @@ import {
   DefaultSystemPrompt,
   DefaultTextConfiguration,
   DefaultToolSchema,
-  WeatherToolSchema
+  WeatherToolSchema,
+  KnowledgeBaseToolSchema 
 } from "./consts";
 
 export interface NovaSonicBidirectionalStreamClientConfig {
@@ -151,6 +154,10 @@ interface SessionData {
   isAudioContentStartSent: boolean;
   audioContentId: string;
 }
+interface ToolUseContent {
+  content: string;
+}
+
 
 export class NovaSonicBidirectionalStreamClient {
   private bedrockRuntimeClient: BedrockRuntimeClient;
@@ -241,6 +248,28 @@ export class NovaSonicBidirectionalStreamClient {
     const tool = toolName.toLowerCase();
 
     switch (tool) {
+      case "getknowledgebaseanswer":
+        // const kbQuery = JSON.parse(toolUseContent.content)?.query;
+        const kbQuery = JSON.parse((toolUseContent as any).content)?.query;
+        const ragResponse = await axios.post("http://localhost:8001/rag/query", {
+          query: kbQuery
+        });
+        return ragResponse.data?.results?.documents?.[0] || "No relevant answer found.";
+
+      case "retrieve_benefit_policy":
+        const parsedKB = await this.parseToolUseContent(toolUseContent);
+        if (!parsedKB) throw new Error("Invalid KB query input");
+
+        // Replace with your actual Knowledge Base ID
+        const KNOWLEDGE_BASE_ID = "your-bedrock-kb-id";
+
+        const kbClient = new BedrockKnowledgeBaseClient(); // You'll need to create this
+        return await kbClient.retrieveFromKnowledgeBase({
+          knowledgeBaseId: KNOWLEDGE_BASE_ID,
+          query: parsedKB.query,
+          numberOfResults: 3
+        });
+
       case "getdateandtimetool":
         const date = new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
         const pstDate = new Date(date);
@@ -268,6 +297,22 @@ export class NovaSonicBidirectionalStreamClient {
       default:
         console.log(`Tool ${tool} not supported`)
         throw new Error(`Tool ${tool} not supported`);
+    }
+  }
+
+  private async parseToolUseContent(toolUseContent: any): Promise<{ query: string; maxResults?: number } | null> {
+    try {
+      if (toolUseContent && typeof toolUseContent.content === 'string') {
+        const parsedContent = JSON.parse(toolUseContent.content);
+        return {
+          query: parsedContent.query,
+          maxResults: parsedContent.maxResults ?? 3
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("Failed to parse tool use content for KB query:", error);
+      return null;
     }
   }
 
@@ -637,25 +682,44 @@ export class NovaSonicBidirectionalStreamClient {
             mediaType: "application/json",
           },
           toolConfiguration: {
-            tools: [{
-              toolSpec: {
-                name: "getDateAndTimeTool",
-                description: "Get information about the current date and time.",
-                inputSchema: {
-                  json: DefaultToolSchema
-                }
-              }
-            },
-            {
-              toolSpec: {
-                name: "getWeatherTool",
-                description: "Get the current weather for a given location, based on its WGS84 coordinates.",
-                inputSchema: {
-                  json: WeatherToolSchema
-                }
-              }
-            }
-            ]
+              tools: [
+                      {
+                        toolSpec: {
+                          name: "getKnowledgeBaseAnswer",
+                          description: "Get answers about Aglaia HR policies using a knowledge base.",
+                          inputSchema: {
+                            json: KnowledgeBaseToolSchema
+                          }
+                        }
+                      },
+                      {
+                        toolSpec: {
+                          name: "getDateAndTimeTool",
+                          description: "Get information about the current date and time.",
+                          inputSchema: {
+                            json: DefaultToolSchema
+                          }
+                        }
+                      },
+                      {
+                        toolSpec: {
+                          name: "getWeatherTool",
+                          description: "Get the current weather for a given location, based on its WGS84 coordinates.",
+                          inputSchema: {
+                            json: WeatherToolSchema
+                          }
+                        }
+                      },
+                      {
+                        toolSpec: {
+                          name: "retrieve_benefit_policy",
+                          description: "Retrieves benefit policy information based on the user's question from the company's knowledge base.",
+                          inputSchema: {
+                            json: KnowledgeBaseToolSchema
+                          }
+                        }
+                      }
+                    ]
           },
         },
       }

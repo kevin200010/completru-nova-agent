@@ -47,3 +47,14 @@ export const DefaultAudioOutputConfiguration = {
   sampleRateHertz: 24000,
   voiceId: "tiffany",
 };
+
+export const KnowledgeBaseToolSchema = JSON.stringify({
+  type: "object",
+  properties: {
+    query: {
+      type: "string",
+      description: "User's question about employee policies"
+    }
+  },
+  required: ["query"]
+});
