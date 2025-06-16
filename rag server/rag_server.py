@@ -15,7 +15,15 @@ class Query(BaseModel):
 def rag_query(payload: Query):
     query_embedding = embedder.encode([payload.query])[0].tolist()
     results = collection.query(query_embeddings=[query_embedding], n_results=3)
-    return {"results": results}
+
+    documents = results.get("documents", [[]])[0]  # Extract list of top docs
+    if not documents:
+        return {"result": "No relevant content found."}
+
+    # Join top results into a single plain string
+    response_text = "\n\n".join(documents)
+    return {"result": response_text}
+
 
 @app.post("/rag/upload")
 async def upload_doc(file: UploadFile = File(...)):

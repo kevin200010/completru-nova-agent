@@ -250,11 +250,12 @@ export class NovaSonicBidirectionalStreamClient {
     switch (tool) {
       case "getknowledgebaseanswer":
         // const kbQuery = JSON.parse(toolUseContent.content)?.query;
-        const kbQuery = JSON.parse((toolUseContent as any).content)?.query;
-        const ragResponse = await axios.post("http://localhost:8001/rag/query", {
-          query: kbQuery
-        });
-        return ragResponse.data?.results?.documents?.[0] || "No relevant answer found.";
+          const kbQuery = JSON.parse((toolUseContent as any).content)?.query;
+          const ragResponse = await axios.post("http://localhost:8001/rag/query", {
+            query: kbQuery
+          });
+
+          return ragResponse.data?.result || "No relevant content found.";
 
       case "retrieve_benefit_policy":
         const parsedKB = await this.parseToolUseContent(toolUseContent);
