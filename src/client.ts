@@ -855,12 +855,14 @@ export class NovaSonicBidirectionalStreamClient {
     let resultContent: string;
 
     if (typeof result === 'string') {
-      resultContent = result.trim();
+      // Clean line breaks and extra spaces
+      resultContent = result.replace(/\s*\n\s*/g, ' ').trim();
     } else if (typeof result === 'object' && result.result) {
-      resultContent = String(result.result).trim();
+      resultContent = String(result.result).replace(/\s*\n\s*/g, ' ').trim();
     } else {
-      resultContent = String(result).trim();
+      resultContent = String(result).replace(/\s*\n\s*/g, ' ').trim();
     }
+
 
     console.log("Final tool result string being sent to model:", resultContent);
 
