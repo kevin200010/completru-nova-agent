@@ -249,13 +249,15 @@ export class NovaSonicBidirectionalStreamClient {
 
     switch (tool) {
       case "getknowledgebaseanswer":
-        // const kbQuery = JSON.parse(toolUseContent.content)?.query;
-          const kbQuery = JSON.parse((toolUseContent as any).content)?.query;
-          const ragResponse = await axios.post("http://localhost:8001/rag/query", {
-            query: kbQuery
-          });
+        const kbQuery = JSON.parse((toolUseContent as any).content)?.query;
+        const ragResponse = await axios.post("http://localhost:8001/rag/query", {
+          query: kbQuery
+        });
 
-          return ragResponse.data?.result || "No relevant content found.";
+        console.log("Tool raw response:", ragResponse.data);
+
+        // ✅ Return plain string
+        return ragResponse.data?.result || "No relevant content found.";
 
       case "retrieve_benefit_policy":
         const parsedKB = await this.parseToolUseContent(toolUseContent);
@@ -849,7 +851,19 @@ export class NovaSonicBidirectionalStreamClient {
     });
 
     // Tool content input
-    const resultContent = typeof result === 'string' ? result : JSON.stringify(result);
+    // Ensure plain string response ONLY
+    let resultContent: string;
+
+    if (typeof result === 'string') {
+      resultContent = result.trim();
+    } else if (typeof result === 'object' && result.result) {
+      resultContent = String(result.result).trim();
+    } else {
+      resultContent = String(result).trim();
+    }
+
+    console.log("Final tool result string being sent to model:", resultContent);
+
     this.addEventToSessionQueue(sessionId, {
       event: {
         toolResult: {
