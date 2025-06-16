@@ -686,7 +686,7 @@ export class NovaSonicBidirectionalStreamClient {
                       {
                         toolSpec: {
                           name: "getKnowledgeBaseAnswer",
-                          description: "Get answers about Aglaia HR policies using a knowledge base.",
+                          description: "Retrieves benefit policy information based on the user's question from the company's knowledge base.",
                           inputSchema: {
                             json: KnowledgeBaseToolSchema
                           }
@@ -710,15 +710,15 @@ export class NovaSonicBidirectionalStreamClient {
                           }
                         }
                       },
-                      {
-                        toolSpec: {
-                          name: "retrieve_benefit_policy",
-                          description: "Retrieves benefit policy information based on the user's question from the company's knowledge base.",
-                          inputSchema: {
-                            json: KnowledgeBaseToolSchema
-                          }
-                        }
-                      }
+                      // {
+                      //   toolSpec: {
+                      //     name: "retrieve_benefit_policy",
+                      //     description: "Retrieves benefit policy information based on the user's question from the company's knowledge base.",
+                      //     inputSchema: {
+                      //       json: KnowledgeBaseToolSchema
+                      //     }
+                      //   }
+                      // }
                     ]
           },
         },
