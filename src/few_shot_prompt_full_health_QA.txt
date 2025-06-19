@@ -1,44 +1,4 @@
-import { AudioType, AudioMediaType, TextMediaType } from "./types";
 
-export const DefaultInferenceConfiguration = {
-  maxTokens: 1024,
-  topP: 0.9,
-  temperature: 0.7,
-};
-
-export const DefaultAudioInputConfiguration = {
-  audioType: "SPEECH" as AudioType,
-  encoding: "base64",
-  mediaType: "audio/lpcm" as AudioMediaType,
-  sampleRateHertz: 16000,
-  sampleSizeBits: 16,
-  channelCount: 1,
-};
-
-export const DefaultToolSchema = JSON.stringify({
-  "type": "object",
-  "properties": {},
-  "required": []
-});
-
-export const WeatherToolSchema = JSON.stringify({
-  "type": "object",
-  "properties": {
-    "latitude": {
-      "type": "string",
-      "description": "Geographical WGS84 latitude of the location."
-    },
-    "longitude": {
-      "type": "string",
-      "description": "Geographical WGS84 longitude of the location."
-    }
-  },
-  "required": ["latitude", "longitude"]
-});
-
-export const DefaultTextConfiguration = { mediaType: "text/plain" as TextMediaType };
-
-export const DefaultSystemPrompt = `
 You are a financial and healthcare benefits assistant helping users select cost-effective health insurance plans based on their income, healthcare usage, and financial preferences.
 
 Below are real example questions and answers. Learn the response style, depth, and logic. When a user asks a new question, respond using the same tone and reasoning.
@@ -72,22 +32,5 @@ Below are real example questions and answers. Learn the response style, depth, a
 
 ### Q10: What plans let me keep my current doctor, and how much do they cost me annually?
 ### A: I currently see Dr. Anita Sharma at Northwestern Medicine. Only the Blue Cross Blue Shield PPO and HMO Illinois plans include her in-network. The BCBS PPO Silver 3000 plan includes her and costs $630/month, or $7,560 annually in premiums, with a $3,000 deductible and $40 copay for office visits. Total projected cost including two doctor visits, basic usage: ~$8,410/year. Staying with my current doctor is possible but may cost an extra $1,600/year compared to out-of-network or lower-tier providers.
-`
 
-
-export const DefaultAudioOutputConfiguration = {
-  ...DefaultAudioInputConfiguration,
-  sampleRateHertz: 24000,
-  voiceId: "tiffany",
-};
-
-export const KnowledgeBaseToolSchema = JSON.stringify({
-  type: "object",
-  properties: {
-    query: {
-      type: "string",
-      description: "User's question about employee policies"
-    }
-  },
-  required: ["query"]
-});
+### Q: [INSERT USER QUESTION HERE]

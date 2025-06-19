@@ -536,3 +536,6 @@ stopButton.addEventListener('click', stopStreaming);
 
 // Initialize the app when the page loads
 document.addEventListener('DOMContentLoaded', initAudio);
+
+//const chatContainer = document.getElementById('chat-container');
+chatContainer.scrollTop = chatContainer.scrollHeight;
