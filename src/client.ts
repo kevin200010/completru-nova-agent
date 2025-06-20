@@ -841,28 +841,32 @@ export class NovaSonicBidirectionalStreamClient {
           role: "TOOL",
           toolResultInputConfiguration: {
             toolUseId: toolUseId,
-            type: "TEXT",
+            type: "JSON",
             textInputConfiguration: {
-              mediaType: "text/plain"
+              mediaType: "text/json"
             }
           }
         }
       }
     });
 
+        
     // Tool content input
     // Ensure plain string response ONLY
-    let resultContent: string;
+    // let resultContent: string;
 
-    if (typeof result === 'string') {
-      // Clean line breaks and extra spaces
-      resultContent = result.replace(/\s*\n\s*/g, ' ').trim();
-    } else if (typeof result === 'object' && result.result) {
-      resultContent = String(result.result).replace(/\s*\n\s*/g, ' ').trim();
-    } else {
-      resultContent = String(result).replace(/\s*\n\s*/g, ' ').trim();
-    }
+    // if (typeof result === 'string') {
+    //   // Clean line breaks and extra spaces
+    //   resultContent = result.replace(/\s*\n\s*/g, ' ').trim();
+    // } else if (typeof result === 'object' && result.result) {
+    //   resultContent = String(result.result).replace(/\s*\n\s*/g, ' ').trim();
+    // } else {
+    //   resultContent = String(result).replace(/\s*\n\s*/g, ' ').trim();
+    // }
 
+    const resultContent = JSON.stringify({
+      result: typeof result === "string" ? result.trim() : result
+    });
 
     console.log("Final tool result string being sent to model:", resultContent);
 
