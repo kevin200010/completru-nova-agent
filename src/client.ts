@@ -259,6 +259,21 @@ export class NovaSonicBidirectionalStreamClient {
         // ✅ Return plain string
         return ragResponse.data?.result || "No relevant content found.";
 
+      case "get_aws_billing_costs":
+        try {
+          const response = await axios.post("http://localhost:8002/get_aws_billing_costs", JSON.parse((toolUseContent as any).content));
+          const data = response.data;
+
+          return {
+            result: `Your ${data.service} cost in ${data.region} from ${data.start_date} to ${data.end_date} was ${data.cost}.`
+          };
+        } catch (error) {
+          console.error("Billing tool error:", error);
+          return {
+            result: "Sorry, I was unable to fetch your billing information at this time."
+          };
+        }
+
       case "retrieve_benefit_policy":
         const parsedKB = await this.parseToolUseContent(toolUseContent);
         if (!parsedKB) throw new Error("Invalid KB query input");
@@ -692,6 +707,24 @@ export class NovaSonicBidirectionalStreamClient {
                           description: "Retrieves benefit policy information based on the user's question from the company's knowledge base.",
                           inputSchema: {
                             json: KnowledgeBaseToolSchema
+                          }
+                        }
+                      },
+                      {
+                        toolSpec: {
+                          name: "get_aws_billing_costs",
+                          description: "Fetch AWS billing cost for a specific service, region, and time period.",
+                          inputSchema: {
+                            json: {
+                              type: "object",
+                              properties: {
+                                service: { type: "string" },
+                                region: { type: "string" },
+                                start_date: { type: "string", format: "date" },
+                                end_date: { type: "string", format: "date" }
+                              },
+                              required: ["service", "start_date", "end_date"]
+                            }
                           }
                         }
                       },
